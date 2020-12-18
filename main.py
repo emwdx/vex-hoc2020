@@ -1,4 +1,5 @@
-
+# In this trial, I abandoned the idea that sitting and waiting was a good idea and instead spent battery going and getting some of the trash I knew was on the field.
+# This also changes behavior in multiple modes after not detecting any objects within a certain range.
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
 TURN_RIGHT = 2
@@ -6,7 +7,7 @@ PAUSED = 3
 RETURN_TO_CENTER = 4
 BACK_UP = 5
 
-PAUSE_TIME = 60
+PAUSE_TIME = 1
 
 currentState = DRIVE_STRAIGHT
 hasPickedUpBottle = False
@@ -19,13 +20,23 @@ def evaluateState():
     global currentState
     global hasPickedUpBottle
     if(currentState == DRIVE_STRAIGHT):
-        if(not(hasPickedUpBottle) and location.position(Y,MM)>10):
+        if(not(hasPickedUpBottle) and location.position(X,MM)>10):
             hasPickedUpBottle = True
             pen.move(DOWN)
             currentState = PAUSED
-        if(down_eye.detect(BLUE)):
+        elif(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
+        elif(brain.timer_time(SECONDS)>3.0):
+            
+            randomValue = round(brain.timer_time(SECONDS)%3 ==0)
+            brain.timer_reset()
+            if(randomValue == 0):
+                currentState = TURN_LEFT
+            elif(randomValue == 1):
+                currentState = TURN_RIGHT
+            else:
+                currentState = RETURN_TO_CENTER
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
             drivetrain.set_drive_velocity(50,PERCENT)
@@ -37,8 +48,20 @@ def evaluateState():
             else:
                 currentState = RETURN_TO_CENTER
     elif(currentState == TURN_LEFT or currentState == TURN_RIGHT):
-        if(distance.found_object() and distance.get_distance(MM)<500):
+        if(down_eye.detect(BLUE)):
+            drivetrain.set_drive_velocity(30,PERCENT)
+            currentState = BACK_UP
+        elif(distance.found_object() and distance.get_distance(MM)<500):
             currentState = DRIVE_STRAIGHT
+        elif(brain.timer_time(SECONDS)>2.0):  
+            randomValue = round(brain.timer_time(SECONDS)%3 == 0)
+            brain.timer_reset()
+            if(randomValue == 0):
+                currentState = TURN_LEFT
+            elif(randomValue == 1):
+                currentState = TURN_RIGHT
+            else:
+                currentState = RETURN_TO_CENTER
     elif(currentState == RETURN_TO_CENTER):
         if(calculateDistanceToCenter < 10):
             currentState = DRIVE_STRAIGHT
@@ -56,7 +79,7 @@ def reactToState():
         drivetrain.drive_for(REVERSE,100,MM)
     elif(currentState == RETURN_TO_CENTER):
         drivetrain.set_heading(calculateHeadingToCenter(),DEGREES)
-        drivetrain.drive_for(FORWARD,60,MM)
+        drivetrain.drive_for(FORWARD,calculateDistanceToCenter(),MM)
     if(currentState == PAUSED):
         if(brain.timer_time(SECONDS)> PAUSE_TIME):
             currentState = DRIVE_STRAIGHT
@@ -86,6 +109,13 @@ def calculateDistanceToCenter():
 def when_started1():
     global currentState
     
+    drivetrain.turn_to_heading(270, DEGREES)
+    drivetrain.drive_for(FORWARD, 800, MM)
+    drivetrain.turn_to_heading(45, DEGREES)
+    drivetrain.drive_for(FORWARD, 1100, MM)
+    drivetrain.turn_to_heading(90, DEGREES)
+    drivetrain.drive_for(FORWARD, 700, MM)
+    drivetrain.turn_to_heading(0, DEGREES)
     while(True):
         updateSystem()
         evaluateState()
