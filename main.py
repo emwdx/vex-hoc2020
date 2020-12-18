@@ -1,5 +1,4 @@
-#Increasing the speed and adjusting the times gives a pretty consistent sweeping over the area.
-#I wonder about reducing the time spent getting the initial pieces of trash and spending more time sweeping over a bigger area.
+# For pretty much the entire time, my code to randomly select another direction has been incorrect. No wonder it hasn't been returning to center very often.
 
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
@@ -28,7 +27,7 @@ def evaluateState():
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
         elif(brain.timer_time(SECONDS)>1.2):
-            randomValue = round(brain.timer_time(SECONDS)%3 ==0)
+            randomValue = round(brain.timer_time(SECONDS)%3)
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
@@ -39,7 +38,7 @@ def evaluateState():
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
             drivetrain.set_drive_velocity(50,PERCENT)
-            randomValue = round(brain.timer_time(SECONDS)%3==0)
+            randomValue = round(brain.timer_time(SECONDS)%3)
             if(randomValue == 0):
                 currentState = TURN_LEFT
             elif(randomValue == 1):
@@ -50,10 +49,10 @@ def evaluateState():
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(distance.found_object() and distance.get_distance(MM)<2000):
+        elif(distance.found_object() and distance.get_distance(MM)<1500):
             currentState = DRIVE_STRAIGHT
         elif(brain.timer_time(SECONDS)>1.0):  
-            randomValue = round(brain.timer_time(SECONDS)%3 == 0)
+            randomValue = round(brain.timer_time(SECONDS)%3)
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
@@ -108,12 +107,8 @@ def calculateDistanceToCenter():
 def when_started1():
     global currentState
     
-    drivetrain.turn_to_heading(270, DEGREES)
-    drivetrain.drive_for(FORWARD, 800, MM)
     drivetrain.turn_to_heading(45, DEGREES)
-    drivetrain.drive_for(FORWARD, 1100, MM)
-    drivetrain.turn_to_heading(90, DEGREES)
-    drivetrain.drive_for(FORWARD, 700, MM)
+    drivetrain.drive_for(FORWARD, 1000, MM)
     drivetrain.turn_to_heading(0, DEGREES)
     while(True):
         updateSystem()
