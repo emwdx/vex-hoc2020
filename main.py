@@ -1,46 +1,87 @@
 
-# 42 kg
-
-
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
 TURN_RIGHT = 2
-AT_EDGE = 3
-OBJECT_DETECTED = 4
+PAUSED = 3
+RETURN_TO_CENTER = 4
 BACK_UP = 5
 
+PAUSE_TIME = 60
 
 currentState = DRIVE_STRAIGHT
-
+hasPickedUpBottle = False
 
 def updateSystem():
+    drivetrain.set_drive_velocity(50,PERCENT)
     pass
 
 def evaluateState():
     global currentState
+    global hasPickedUpBottle
     if(currentState == DRIVE_STRAIGHT):
+        if(not(hasPickedUpBottle) and location.position(Y,MM)>10):
+            hasPickedUpBottle = True
+            pen.move(DOWN)
+            currentState = PAUSED
         if(down_eye.detect(BLUE)):
+            drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
-            if(round(brain.timer_time(SECONDS)%2 ==0)):
+            drivetrain.set_drive_velocity(50,PERCENT)
+            randomValue = round(brain.timer_time(SECONDS)%3 ==0)
+            if(randomValue == 0):
                 currentState = TURN_LEFT
-            else:
+            elif(randomValue == 1):
                 currentState = TURN_RIGHT
+            else:
+                currentState = RETURN_TO_CENTER
     elif(currentState == TURN_LEFT or currentState == TURN_RIGHT):
-        if(distance.found_object()):
+        if(distance.found_object() and distance.get_distance(MM)<500):
             currentState = DRIVE_STRAIGHT
+    elif(currentState == RETURN_TO_CENTER):
+        if(calculateDistanceToCenter < 10):
+            currentState = DRIVE_STRAIGHT
+        
 
 def reactToState():
     global currentState
     if(currentState == DRIVE_STRAIGHT):
-        drivetrain.drive_for(FORWARD,50,MM)
+        drivetrain.drive_for(FORWARD,60,MM)
     elif(currentState == TURN_LEFT):
-        drivetrain.turn_for(LEFT,20,DEGREES)
+        drivetrain.turn_for(LEFT,10,DEGREES)
     elif(currentState == TURN_RIGHT):
-        drivetrain.turn_for(RIGHT,20,DEGREES)
+        drivetrain.turn_for(RIGHT,10,DEGREES)
     elif(currentState == BACK_UP):
-        drivetrain.drive_for(REVERSE,200,MM)
+        drivetrain.drive_for(REVERSE,100,MM)
+    elif(currentState == RETURN_TO_CENTER):
+        drivetrain.set_heading(calculateHeadingToCenter(),DEGREES)
+        drivetrain.drive_for(FORWARD,60,MM)
+    if(currentState == PAUSED):
+        if(brain.timer_time(SECONDS)> PAUSE_TIME):
+            currentState = DRIVE_STRAIGHT
+            brain.timer_reset()
+        
+
+def calculateHeadingToCenter():
+    x = location.position(X,mm)
+    y = location.position(Y,mm)
+    angle = Math.atan2(x/y)* 180/ Math.PI
+    if(x > 0):
+        if(y>0):
+            return 90.0 + angle
+        else:
+            return 180 - angle
+    else:
+        if(y>0):
+            return 90.0 + angle
+        else:
+            return angle
+
+def calculateDistanceToCenter():
+    x = location.position(X,mm)
+    y = location.position(Y,mm)
+    return round(Math.sqrt(x*x + y*y))
 
 def when_started1():
     global currentState
@@ -49,8 +90,8 @@ def when_started1():
         updateSystem()
         evaluateState()
         reactToState()
+        wait(1,MSEC)
 
-    wait(1,MSEC)
     pass
 
 vr_thread(when_started1())
