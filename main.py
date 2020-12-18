@@ -1,6 +1,5 @@
-# Really interesting here. The behavior is a spiral from the center that tends to be toward the upper half. 
-# Reducing the time the robot can drive straight to 1.2 seconds is what keeps the robot finding trash without having to go too far. It is
-# enough to stay in the area defined by that circle to stay in the range of 50+ kg.
+#Increasing the speed and adjusting the times gives a pretty consistent sweeping over the area.
+#I wonder about reducing the time spent getting the initial pieces of trash and spending more time sweeping over a bigger area.
 
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
@@ -15,7 +14,7 @@ currentState = DRIVE_STRAIGHT
 hasPickedUpBottle = False
 
 def updateSystem():
-    drivetrain.set_drive_velocity(50,PERCENT)
+    drivetrain.set_drive_velocity(60,PERCENT)
     pen.move(DOWN)
 
     pass
@@ -53,7 +52,7 @@ def evaluateState():
             currentState = BACK_UP
         elif(distance.found_object() and distance.get_distance(MM)<2000):
             currentState = DRIVE_STRAIGHT
-        elif(brain.timer_time(SECONDS)>2.0):  
+        elif(brain.timer_time(SECONDS)>1.0):  
             randomValue = round(brain.timer_time(SECONDS)%3 == 0)
             brain.timer_reset()
             if(randomValue == 0):
