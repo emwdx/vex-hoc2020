@@ -1,8 +1,6 @@
-# No changes with a higher speed.
-# For this iteration, I cleaned up the PAUSED state from the evaluateState code. 
-# I also changed the drive straight code to randomly choose one of the three other states after driving straight for 1.5 seconds.
-# This tended to keep the robot from driving farther to pick up garbage and kept it scanning for closer ones.
-# 20:04
+# Really interesting here. The behavior is a spiral from the center that tends to be toward the upper half. 
+# Reducing the time the robot can drive straight to 1.2 seconds is what keeps the robot finding trash without having to go too far. It is
+# enough to stay in the area defined by that circle to stay in the range of 50+ kg.
 
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
@@ -30,7 +28,7 @@ def evaluateState():
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(brain.timer_time(SECONDS)>1.5):
+        elif(brain.timer_time(SECONDS)>1.2):
             randomValue = round(brain.timer_time(SECONDS)%3 ==0)
             brain.timer_reset()
             if(randomValue == 0):
