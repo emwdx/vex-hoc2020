@@ -1,6 +1,9 @@
-# The electromagnet did nothing. I did another trial with it commented out to see what it did, and it seemed to decrease the average further.
+# No changes with a higher speed.
+# For this iteration, I cleaned up the PAUSED state from the evaluateState code. 
+# I also changed the drive straight code to randomly choose one of the three other states after driving straight for 1.5 seconds.
+# This tended to keep the robot from driving farther to pick up garbage and kept it scanning for closer ones.
+# 20:04
 
-# I'm curious about using the same algorithm but with a higher speed to see if that changes anything.
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
 TURN_RIGHT = 2
@@ -14,7 +17,8 @@ currentState = DRIVE_STRAIGHT
 hasPickedUpBottle = False
 
 def updateSystem():
-    drivetrain.set_drive_velocity(100,PERCENT)
+    drivetrain.set_drive_velocity(50,PERCENT)
+    pen.move(DOWN)
 
     pass
 
@@ -22,15 +26,11 @@ def evaluateState():
     global currentState
     global hasPickedUpBottle
     if(currentState == DRIVE_STRAIGHT):
-        if(not(hasPickedUpBottle) and location.position(X,MM)>10):
-            hasPickedUpBottle = True
-            pen.move(DOWN)
-            currentState = PAUSED
-        elif(down_eye.detect(BLUE)):
+       
+        if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(brain.timer_time(SECONDS)>3.0):
-            
+        elif(brain.timer_time(SECONDS)>1.5):
             randomValue = round(brain.timer_time(SECONDS)%3 ==0)
             brain.timer_reset()
             if(randomValue == 0):
@@ -42,7 +42,7 @@ def evaluateState():
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
             drivetrain.set_drive_velocity(50,PERCENT)
-            randomValue = round(brain.timer_time(SECONDS)%3 ==0)
+            randomValue = round(brain.timer_time(SECONDS)%3==0)
             if(randomValue == 0):
                 currentState = TURN_LEFT
             elif(randomValue == 1):
@@ -53,7 +53,7 @@ def evaluateState():
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(distance.found_object() and distance.get_distance(MM)<500):
+        elif(distance.found_object() and distance.get_distance(MM)<2000):
             currentState = DRIVE_STRAIGHT
         elif(brain.timer_time(SECONDS)>2.0):  
             randomValue = round(brain.timer_time(SECONDS)%3 == 0)
