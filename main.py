@@ -1,5 +1,6 @@
-# I learned about the electromagnet function - I wanted to see if adding it changed anything.
+# The electromagnet did nothing. I did another trial with it commented out to see what it did, and it seemed to decrease the average further.
 
+# I'm curious about using the same algorithm but with a higher speed to see if that changes anything.
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
 TURN_RIGHT = 2
@@ -13,8 +14,8 @@ currentState = DRIVE_STRAIGHT
 hasPickedUpBottle = False
 
 def updateSystem():
-    drivetrain.set_drive_velocity(50,PERCENT)
-    magnet.energize(BOOST)
+    drivetrain.set_drive_velocity(100,PERCENT)
+
     pass
 
 def evaluateState():
