@@ -1,5 +1,5 @@
-# In this trial, I abandoned the idea that sitting and waiting was a good idea and instead spent battery going and getting some of the trash I knew was on the field.
-# This also changes behavior in multiple modes after not detecting any objects within a certain range.
+# I learned about the electromagnet function - I wanted to see if adding it changed anything.
+
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
 TURN_RIGHT = 2
@@ -14,6 +14,7 @@ hasPickedUpBottle = False
 
 def updateSystem():
     drivetrain.set_drive_velocity(50,PERCENT)
+    magnet.energize(BOOST)
     pass
 
 def evaluateState():
