@@ -1,4 +1,4 @@
-# For pretty much the entire time, my code to randomly select another direction has been incorrect. No wonder it hasn't been returning to center very often.
+
 
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
@@ -7,10 +7,11 @@ PAUSED = 3
 RETURN_TO_CENTER = 4
 BACK_UP = 5
 
-PAUSE_TIME = 1
+PAUSE_TIME = 1.0
 
 currentState = DRIVE_STRAIGHT
 hasPickedUpBottle = False
+randomVariable = 0.0
 
 def updateSystem():
     drivetrain.set_drive_velocity(60,PERCENT)
@@ -21,49 +22,49 @@ def updateSystem():
 def evaluateState():
     global currentState
     global hasPickedUpBottle
+    global randomVariable
     if(currentState == DRIVE_STRAIGHT):
        
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(brain.timer_time(SECONDS)>1.2):
-            randomValue = round(brain.timer_time(SECONDS)%3)
+        elif(brain.timer_time(SECONDS)>1.5):
+            randomValue = brain.timer_time(SECONDS)
+            print(brain.timer_time(SECONDS))
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
-            elif(randomValue == 1):
-                currentState = TURN_RIGHT
             else:
-                currentState = RETURN_TO_CENTER
+                currentState = TURN_RIGHT
+           
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
             drivetrain.set_drive_velocity(50,PERCENT)
-            randomValue = round(brain.timer_time(SECONDS)%3)
+            randomValue = brain.timer_time(SECONDS)
             if(randomValue == 0):
                 currentState = TURN_LEFT
-            elif(randomValue == 1):
-                currentState = TURN_RIGHT
             else:
-                currentState = RETURN_TO_CENTER
+                currentState = TURN_RIGHT
+        
     elif(currentState == TURN_LEFT or currentState == TURN_RIGHT):
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
         elif(distance.found_object() and distance.get_distance(MM)<1500):
             currentState = DRIVE_STRAIGHT
-        elif(brain.timer_time(SECONDS)>1.0):  
-            randomValue = round(brain.timer_time(SECONDS)%3)
+        elif(brain.timer_time(SECONDS)>1.5):  
+            print(brain.timer_time(SECONDS))
+            
+            randomValue = brain.timer_time(SECONDS)
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
-            elif(randomValue == 1):
-                currentState = TURN_RIGHT
             else:
-                currentState = RETURN_TO_CENTER
-    elif(currentState == RETURN_TO_CENTER):
-        if(calculateDistanceToCenter < 10):
-            currentState = DRIVE_STRAIGHT
+                currentState = TURN_RIGHT
         
+    
+    else:
+        pass   
 
 def reactToState():
     global currentState
@@ -75,38 +76,16 @@ def reactToState():
         drivetrain.turn_for(RIGHT,10,DEGREES)
     elif(currentState == BACK_UP):
         drivetrain.drive_for(REVERSE,100,MM)
-    elif(currentState == RETURN_TO_CENTER):
-        drivetrain.set_heading(calculateHeadingToCenter(),DEGREES)
-        drivetrain.drive_for(FORWARD,calculateDistanceToCenter(),MM)
+   
     if(currentState == PAUSED):
         if(brain.timer_time(SECONDS)> PAUSE_TIME):
             currentState = DRIVE_STRAIGHT
             brain.timer_reset()
         
-
-def calculateHeadingToCenter():
-    x = location.position(X,mm)
-    y = location.position(Y,mm)
-    angle = Math.atan2(x/y)* 180/ Math.PI
-    if(x > 0):
-        if(y>0):
-            return 90.0 + angle
-        else:
-            return 180 - angle
-    else:
-        if(y>0):
-            return 90.0 + angle
-        else:
-            return angle
-
-def calculateDistanceToCenter():
-    x = location.position(X,mm)
-    y = location.position(Y,mm)
-    return round(Math.sqrt(x*x + y*y))
-
 def when_started1():
     global currentState
-    
+    global randomVariable
+    monitor_variable("randomValue")
     drivetrain.turn_to_heading(45, DEGREES)
     drivetrain.drive_for(FORWARD, 1000, MM)
     drivetrain.turn_to_heading(0, DEGREES)
