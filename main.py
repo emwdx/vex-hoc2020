@@ -1,4 +1,6 @@
-
+# Some things cleaned up here. The random value was correctly implemented after looking at a block code example. 
+# The performance isn't as good as other versions, but there seems to be less happening by accident. 
+# This is important for knowing what I am changing in each iteration.
 
 DRIVE_STRAIGHT = 0
 TURN_LEFT = 1
@@ -14,7 +16,7 @@ hasPickedUpBottle = False
 randomVariable = 0.0
 
 def updateSystem():
-    drivetrain.set_drive_velocity(60,PERCENT)
+    
     pen.move(DOWN)
 
     pass
@@ -28,9 +30,9 @@ def evaluateState():
         if(down_eye.detect(BLUE)):
             drivetrain.set_drive_velocity(30,PERCENT)
             currentState = BACK_UP
-        elif(brain.timer_time(SECONDS)>1.5):
-            randomValue = brain.timer_time(SECONDS)
-            print(brain.timer_time(SECONDS))
+        elif(distance.get_distance(MM)<10 or brain.timer_time(SECONDS)>3.5):
+            randomValue = random.randint(0, 6)
+            print(randomValue)
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
@@ -39,8 +41,8 @@ def evaluateState():
            
     elif(currentState == BACK_UP):
         if(down_eye.detect(NONE)):
-            drivetrain.set_drive_velocity(50,PERCENT)
-            randomValue = brain.timer_time(SECONDS)
+            drivetrain.set_drive_velocity(30,PERCENT)
+            randomValue = randomValue = random.randint(0, 6)
             if(randomValue == 0):
                 currentState = TURN_LEFT
             else:
@@ -48,14 +50,14 @@ def evaluateState():
         
     elif(currentState == TURN_LEFT or currentState == TURN_RIGHT):
         if(down_eye.detect(BLUE)):
-            drivetrain.set_drive_velocity(30,PERCENT)
+            
             currentState = BACK_UP
-        elif(distance.found_object() and distance.get_distance(MM)<1500):
+        elif(distance.found_object() and distance.get_distance(MM)<1000):
             currentState = DRIVE_STRAIGHT
-        elif(brain.timer_time(SECONDS)>1.5):  
+        elif(brain.timer_time(SECONDS)>3.5):  
             print(brain.timer_time(SECONDS))
             
-            randomValue = brain.timer_time(SECONDS)
+            randomValue = random.randint(0, 6)
             brain.timer_reset()
             if(randomValue == 0):
                 currentState = TURN_LEFT
@@ -89,6 +91,7 @@ def when_started1():
     drivetrain.turn_to_heading(45, DEGREES)
     drivetrain.drive_for(FORWARD, 1000, MM)
     drivetrain.turn_to_heading(0, DEGREES)
+    drivetrain.drive_for(FORWARD, 800, MM)
     while(True):
         updateSystem()
         evaluateState()
